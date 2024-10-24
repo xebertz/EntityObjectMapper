@@ -7,11 +7,15 @@ using System.Security.Cryptography;
 
 namespace DB {
 	/// <summary>
-	/// Class <c>DBController</c> gestiona la interacción con una base de datos de SERVREF.
+	/// Class <c>DBController</c> gestiona la interacción con una base de datos.
 	/// </summary>
 	public class DBController {
-		private string connectionString;
+		private readonly string connectionString;
 
+		/// <summary>
+		/// Crea un <c>DBController</c> para una base de datos.
+		/// </summary>
+		/// <param name="connectionString">El connection string de la base de datos a utilizar.</param>
 		public DBController(string connectionString) {
 			this.connectionString = connectionString;
 		}
