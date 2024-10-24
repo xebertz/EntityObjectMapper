@@ -19,7 +19,7 @@ namespace DB {
 		/// <summary>
 		/// Method <c>Select</c> ejecuta un select en la base de datos.
 		/// <example>
-		/// <code>MyClass resultado = Select&lt;MyClass&gt;(query, parameters);
+		/// <code>MyClass result = Select&lt;MyClass&gt;(query, parameters);
 		/// </code>
 		/// </example>
 		/// </summary>
@@ -31,7 +31,7 @@ namespace DB {
 		/// La query a ejecutar. Esta query puede tener parámetros. Se deben definir con un @.
 		/// <example>
 		/// <code>
-		/// string query = "SELECT * FROM Tabla WHERE Col = @Col";
+		/// string query = "SELECT * FROM Tabla WHERE ID = @ID";
 		/// </code>
 		/// </example>
 		/// </param>
@@ -42,7 +42,7 @@ namespace DB {
 		/// <example>
 		/// <code>
 		/// Dictionary&lt;string, object&gt; parameters = new() {
-		///		["@Col"] = 1
+		///		["@ID"] = 1
 		///	};
 		/// </code>
 		/// </example>
@@ -64,11 +64,32 @@ namespace DB {
 
 		/// <summary>
 		/// Method <c>Select</c> ejecuta un select en la base de datos.
+		/// <example>
+		/// <code>DataTable data = Select(query, parameters);
+		/// </code>
+		/// </example>
 		/// </summary>
-		/// <typeparam name="T">El tipo de dato en el que se serializa la respuesta.</typeparam>
-		/// <param name="query">La query a ejecutar.</param>
-		/// <param name="parameters">Los parámetros de la query.</param>
-		/// <returns>Un DataTable con los datos.</returns>
+		/// <param name="query">
+		/// La query a ejecutar. Esta query puede tener parámetros. Se deben definir con un @.
+		/// <example>
+		/// <code>
+		/// string query = "SELECT * FROM Tabla WHERE ID = @ID";
+		/// </code>
+		/// </example>
+		/// </param>
+		/// <param name="parameters">
+		/// Los parámetros de la query. La key debe ser el nombre del parámetro, incluyendo el @.
+		/// El value debe ser el objeto a utilizar, el tipo de dato debe coincidir con el de 
+		/// la columna.
+		/// <example>
+		/// <code>
+		/// Dictionary&lt;string, object&gt; parameters = new() {
+		///		["@ID"] = 1
+		///	};
+		/// </code>
+		/// </example>
+		/// </param>
+		/// <returns>Un DataTable con la información requerida.</returns>
 		public DataTable Select(string query, Dictionary<string, object> parameters) {
 			DataTable dataTable = new DataTable();
 			ExecuteCommand(query, parameters, command => {
@@ -81,9 +102,32 @@ namespace DB {
 
 		/// <summary>
 		/// Method <c>NonQuery</c> ejecuta una query que puede ser de tipo Update, Delete o Insert.
+		/// <example>
+		/// <code> int affectedRows = NonQuery(query, parameters);
+		/// </code>
+		/// </example>
 		/// </summary>
 		/// <param name="database">La base de datos donde se ejecuta.</param>
-		/// <param name="query">La query a ejecutar.</param>
+		/// <param name="query">
+		/// La query a ejecutar. Esta query puede tener parámetros. Se deben definir con un @.
+		/// <example>
+		/// <code>
+		/// string query = "DELETE FROM Tabla WHERE ID = @ID";
+		/// </code>
+		/// </example>
+		/// </param>
+		/// <param name="parameters">
+		/// Los parámetros de la query. La key debe ser el nombre del parámetro, incluyendo el @.
+		/// El value debe ser el objeto a utilizar, el tipo de dato debe coincidir con el de 
+		/// la columna.
+		/// <example>
+		/// <code>
+		/// Dictionary&lt;string, object&gt; parameters = new() {
+		///		["@ID"] = 1
+		///	};
+		/// </code>
+		/// </example>
+		/// </param>
 		/// <returns>La cantidad de filas afectadas.</returns>
 		public int NonQuery(string query, Dictionary<string, object> parameters) {
 			int value = -1;
@@ -99,15 +143,33 @@ namespace DB {
 
 		/// <summary>
 		/// Ejectuta un Store Procedure con valor de retorno, que recibe parámetros.
+		/// <example>
+		/// <code> int statusCode = StoreProcedureWithCodeRet(storedProcedure, parameters);
+		/// </code>
+		/// </example>
 		/// </summary>
-		/// <param name="database">La base de datos donde se ejecuta.</param>
-		/// <param name="storeProcedure">El nombre del Store Procedure.</param>
+		/// <param name="storedProcedure">
+		/// El nombre del Store Procedure.
+		/// <example>
+		/// <code>
+		/// string storedProcedure = "GenerateReport";
+		/// </code>
+		/// </example>
+		/// </param>
 		/// <param name="spParams">
 		/// Los parámetros que recibe el SP. La key debe ser el nombre del parámetro
 		/// en el SP, incluyendo el @. El value debe ser el objeto a utilizar, con el tipo
 		/// de dato igual que en el SP.
+		/// <example>
+		/// <code>
+		/// Dictionary&lt;string, object&gt; spParams = new() {
+		///		["@Month"] = "January",
+		///		["@Year"] = 2024
+		///	};
+		/// </code>
+		/// </example>
 		/// </param>
-		/// <returns></returns>
+		/// <returns>El status code output del store procedure.</returns>
 		public int StoreProcedureWithCodeRet(string storedProcedure, Dictionary<string, object> spParams) {
 			using (SqlConnection connection = new SqlConnection(connectionString)) {
 
@@ -133,6 +195,12 @@ namespace DB {
 			}
 		}
 
+		/// <summary>
+		/// Ejecuta un comando con parámetros.
+		/// </summary>
+		/// <param name="query">La query a ejecutar.</param>
+		/// <param name="parameters">Los parámetros de la query.</param>
+		/// <param name="action">La acción a ejecutar para el comando específico.</param>
 		private void ExecuteCommand(string query, Dictionary<string, object> parameters, Action<SqlCommand> action) {
 			try {
 				using (SqlConnection connection = new SqlConnection(connectionString)) {
@@ -147,6 +215,11 @@ namespace DB {
 			}
 		}
 
+		/// <summary>
+		/// Carga los parámetros a un comando.
+		/// </summary>
+		/// <param name="command">El comando a utilizar.</param>
+		/// <param name="parameters">Los parámetros a cargar.</param>
 		private void LoadParamsInCommand(SqlCommand command, Dictionary<string, object> parameters) {
 			if (parameters != null) {
 				foreach (var parameter in parameters) {
@@ -166,7 +239,6 @@ namespace DB {
 			var properties = item.GetType().GetRuntimeProperties();
 
 			foreach (var property in properties) {
-				// Obtener el atributo ColumnName personalizado
 				var columnNameAttribute = property.GetCustomAttribute<ColumnNameAttribute>();
 
 				if (columnNameAttribute != null && reader[columnNameAttribute.ColumnName] != DBNull.Value) {
