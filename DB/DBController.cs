@@ -18,10 +18,35 @@ namespace DB {
 
 		/// <summary>
 		/// Method <c>Select</c> ejecuta un select en la base de datos.
+		/// <example>
+		/// <code>MyClass resultado = Select&lt;MyClass&gt;(query, parameters);
+		/// </code>
+		/// </example>
 		/// </summary>
-		/// <typeparam name="T">El tipo de dato en el que se serializa la respuesta.</typeparam>
-		/// <param name="query">La query a ejecutar.</param>
-		/// <param name="parameters">Los parámetros de la query.</param>
+		/// <typeparam name="T">
+		/// El tipo de dato en el que se serializa la respuesta. Debe tener un constructor
+		/// sin parámetros.
+		/// </typeparam>
+		/// <param name="query">
+		/// La query a ejecutar. Esta query puede tener parámetros. Se deben definir con un @.
+		/// <example>
+		/// <code>
+		/// string query = "SELECT * FROM Tabla WHERE Col = @Col";
+		/// </code>
+		/// </example>
+		/// </param>
+		/// <param name="parameters">
+		/// Los parámetros de la query. La key debe ser el nombre del parámetro, incluyendo el @.
+		/// El value debe ser el objeto a utilizar, el tipo de dato debe coincidir con el de 
+		/// la columna.
+		/// <example>
+		/// <code>
+		/// Dictionary&lt;string, object&gt; parameters = new() {
+		///		["@Col"] = 1
+		///	};
+		/// </code>
+		/// </example>
+		/// </param>
 		/// <returns>Una lista de objetos, un objeto por fila.</returns>
 		public List<T> Select<T>(string query, Dictionary<string, object> parameters) where T : new() {
 			List<T> result = new List<T>();
@@ -37,6 +62,13 @@ namespace DB {
 			return result;
 		}
 
+		/// <summary>
+		/// Method <c>Select</c> ejecuta un select en la base de datos.
+		/// </summary>
+		/// <typeparam name="T">El tipo de dato en el que se serializa la respuesta.</typeparam>
+		/// <param name="query">La query a ejecutar.</param>
+		/// <param name="parameters">Los parámetros de la query.</param>
+		/// <returns>Un DataTable con los datos.</returns>
 		public DataTable Select(string query, Dictionary<string, object> parameters) {
 			DataTable dataTable = new DataTable();
 			ExecuteCommand(query, parameters, command => {
@@ -53,7 +85,6 @@ namespace DB {
 		/// <param name="database">La base de datos donde se ejecuta.</param>
 		/// <param name="query">La query a ejecutar.</param>
 		/// <returns>La cantidad de filas afectadas.</returns>
-		/// 
 		public int NonQuery(string query, Dictionary<string, object> parameters) {
 			int value = -1;
 			ExecuteCommand(query, parameters, command => {
