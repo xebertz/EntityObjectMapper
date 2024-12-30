@@ -234,7 +234,7 @@ namespace DB {
 		}
 
 		/// <summary>
-		/// Method <c>_MapDataReaderToModel</c> mapea la lectura de la fila con un objeto.
+		/// Method <c>MapDataReaderToModel</c> mapea la lectura de la fila con un objeto.
 		/// </summary>
 		/// <typeparam name="T">El tipo de objeto en el que se mapea.</typeparam>
 		/// <param name="reader">El lector.</param>
