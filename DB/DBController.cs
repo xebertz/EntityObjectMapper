@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.SqlClient;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -9,8 +10,10 @@ namespace DB {
 	/// <summary>
 	/// Class <c>DBController</c> gestiona la interacción con una base de datos.
 	/// </summary>
-	public class DBController {
+	public class DBController : IDisposable {
 		private readonly string connectionString;
+		private SqlConnection connection;
+		private SqlTransaction transaction;
 
 		/// <summary>
 		/// Crea un <c>DBController</c> para una base de datos.
@@ -18,6 +21,25 @@ namespace DB {
 		/// <param name="connectionString">El connection string de la base de datos a utilizar.</param>
 		public DBController(string connectionString) {
 			this.connectionString = connectionString;
+		}
+
+		public void Connect() {
+			connection = new SqlConnection(connectionString);
+			connection.Open();
+		}
+
+		public void BeginTransaction(IsolationLevel isolationLevel = IsolationLevel.ReadCommitted) {
+			int id = (int)isolationLevel;
+			transaction = connection.BeginTransaction((System.Data.IsolationLevel)id);
+		}
+
+		public void CommitTransaction() => transaction.Commit();
+		public void RollbackTransaction() => transaction.Rollback();
+		public void CloseConnection() => connection.Close();
+
+		public void Dispose() {
+			connection?.Dispose();
+			transaction?.Dispose();
 		}
 
 		/// <summary>
@@ -175,27 +197,23 @@ namespace DB {
 		/// </param>
 		/// <returns>El status code output del store procedure.</returns>
 		public int StoreProcedureWithCodeRet(string storedProcedure, Dictionary<string, object> spParams) {
-			using (SqlConnection connection = new SqlConnection(connectionString)) {
+			SqlCommand command = new SqlCommand(storedProcedure, connection) {
+				CommandType = CommandType.StoredProcedure
+			};
 
-				SqlCommand command = new SqlCommand(storedProcedure, connection) {
-					CommandType = CommandType.StoredProcedure
-				};
+			LoadParamsInCommand(command, spParams);
 
-				LoadParamsInCommand(command, spParams);
+			SqlParameter output = new SqlParameter {
+				Direction = ParameterDirection.ReturnValue
+			};
+			command.Parameters.Add(output);
 
-				SqlParameter output = new SqlParameter {
-					Direction = ParameterDirection.ReturnValue
-				};
-				command.Parameters.Add(output);
-
-				try {
-					command.Connection.Open();
-					command.ExecuteNonQuery();
-					return (int)output.Value;
-				} catch (Exception e) {
-					System.Diagnostics.Debug.WriteLine(e.ToString());
-					return -1;
-				}
+			try {
+				command.ExecuteNonQuery();
+				return (int)output.Value;
+			} catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e.ToString());
+				return -1;
 			}
 		}
 
@@ -207,12 +225,9 @@ namespace DB {
 		/// <param name="action">La acción a ejecutar para el comando específico.</param>
 		private void ExecuteCommand(string query, Dictionary<string, object> parameters, Action<SqlCommand> action) {
 			try {
-				using (SqlConnection connection = new SqlConnection(connectionString)) {
-					connection.Open();
-					using (SqlCommand command = new SqlCommand(query, connection)) {
-						LoadParamsInCommand(command, parameters);
-						action(command);
-					}
+				using (SqlCommand command = new SqlCommand(query, connection)) {
+					LoadParamsInCommand(command, parameters);
+					action(command);
 				}
 			} catch (Exception e) {
 				System.Diagnostics.Debug.WriteLine(e.Data);
