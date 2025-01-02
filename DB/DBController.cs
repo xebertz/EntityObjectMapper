@@ -11,6 +11,17 @@ namespace DB {
 	/// Class <c>DBController</c> gestiona la interacción con una base de datos.
 	/// </summary>
 	public class DBController : IDisposable {
+
+		// Funciona como override de System.Data.IsolationLevel,
+		// para evitar que el usuario tenga que usar este enum en DBController,
+		// y para evitar que se usen ciertos isolation levels poco estrictos
+		public enum IsolationLevel {
+			ReadCommitted = 4096,
+			RepeatableRead = 65536,
+			Serializable = 1048576,
+			Snapshot = 16777216
+		}
+
 		private readonly string connectionString;
 		private SqlConnection connection;
 		private SqlTransaction transaction;
@@ -197,7 +208,7 @@ namespace DB {
 		/// </param>
 		/// <returns>El status code output del store procedure.</returns>
 		public int StoreProcedureWithCodeRet(string storedProcedure, Dictionary<string, object> spParams) {
-			SqlCommand command = new SqlCommand(storedProcedure, connection) {
+			SqlCommand command = new SqlCommand(storedProcedure, connection, transaction) {
 				CommandType = CommandType.StoredProcedure
 			};
 
@@ -225,7 +236,7 @@ namespace DB {
 		/// <param name="action">La acción a ejecutar para el comando específico.</param>
 		private void ExecuteCommand(string query, Dictionary<string, object> parameters, Action<SqlCommand> action) {
 			try {
-				using (SqlCommand command = new SqlCommand(query, connection)) {
+				using (SqlCommand command = new SqlCommand(query, connection, transaction)) {
 					LoadParamsInCommand(command, parameters);
 					action(command);
 				}
