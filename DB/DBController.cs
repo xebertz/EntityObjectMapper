@@ -49,6 +49,7 @@ namespace DB {
 		public void CloseConnection() => connection.Close();
 
 		public void Dispose() {
+			connection?.Close();
 			connection?.Dispose();
 			transaction?.Dispose();
 		}
@@ -173,9 +174,25 @@ namespace DB {
 					value = command.ExecuteNonQuery();
 				} catch (Exception e) {
 					System.Diagnostics.Debug.WriteLine(e.ToString());
+					throw e;
 				}
 			});
 			return value;
+		}
+
+		public void StoreProcedure(string storedProcedure, Dictionary<string, object> spParams) {
+			SqlCommand command = new SqlCommand(storedProcedure, connection, transaction) {
+				CommandType = CommandType.StoredProcedure
+			};
+
+			LoadParamsInCommand(command, spParams);
+
+			try {
+				command.ExecuteNonQuery();
+			} catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e.ToString());
+				throw e;
+			}
 		}
 
 		/// <summary>
@@ -224,6 +241,7 @@ namespace DB {
 				return (int)output.Value;
 			} catch (Exception e) {
 				System.Diagnostics.Debug.WriteLine(e.ToString());
+				throw e;
 				return -1;
 			}
 		}
@@ -242,6 +260,7 @@ namespace DB {
 				}
 			} catch (Exception e) {
 				System.Diagnostics.Debug.WriteLine(e.Data);
+				throw e;
 			}
 		}
 
@@ -281,6 +300,7 @@ namespace DB {
 						}
 					} catch (Exception ex) {
 						System.Diagnostics.Debug.WriteLine($"Error al asignar valor a la propiedad {property.Name}: {ex.Message}");
+						throw ex;
 					}
 				}
 			}
