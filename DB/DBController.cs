@@ -180,7 +180,7 @@ namespace DB {
 			return value;
 		}
 
-		public void StoreProcedure(string storedProcedure, Dictionary<string, object> spParams) {
+		public void StoredProcedure(string storedProcedure, Dictionary<string, object> spParams) {
 			SqlCommand command = new SqlCommand(storedProcedure, connection, transaction) {
 				CommandType = CommandType.StoredProcedure
 			};
@@ -224,7 +224,7 @@ namespace DB {
 		/// </example>
 		/// </param>
 		/// <returns>El status code output del store procedure.</returns>
-		public int StoreProcedureWithCodeRet(string storedProcedure, Dictionary<string, object> spParams) {
+		public int StoredProcedureWithCodeRet(string storedProcedure, Dictionary<string, object> spParams) {
 			SqlCommand command = new SqlCommand(storedProcedure, connection, transaction) {
 				CommandType = CommandType.StoredProcedure
 			};
