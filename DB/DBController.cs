@@ -246,6 +246,26 @@ namespace DB {
 			}
 		}
 
+		public int StoredProcedureWithOutput(string storedProcedure, Dictionary<string, object> spParams, string outputParameter) {
+			SqlCommand command = new SqlCommand(storedProcedure, connection, transaction) {
+				CommandType = CommandType.StoredProcedure
+			};
+
+			LoadParamsInCommand(command, spParams);
+
+			string output = outputParameter.StartsWith("@") ? outputParameter : "@" + outputParameter;
+			command.Parameters[output].Direction = ParameterDirection.Output;
+
+			try {
+				command.ExecuteNonQuery();
+				return (int)command.Parameters[output].Value;
+			} catch (Exception e) {
+				System.Diagnostics.Debug.WriteLine(e.ToString());
+				throw e;
+				return -1;
+			}
+		}
+
 		/// <summary>
 		/// Ejecuta un comando con parámetros.
 		/// </summary>
