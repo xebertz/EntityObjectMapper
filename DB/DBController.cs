@@ -16,7 +16,7 @@ namespace DB {
 		// para evitar que el usuario tenga que usar este enum en DBController,
 		// y para evitar que se usen ciertos isolation levels poco estrictos
 		public enum IsolationLevel {
-			ReadUncomitted = 256,
+			ReadUncommitted = 256,
 			ReadCommitted = 4096,
 			RepeatableRead = 65536,
 			Serializable = 1048576,
