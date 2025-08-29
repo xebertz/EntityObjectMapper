@@ -75,8 +75,6 @@ StyleCopReport.xml
 *.obj
 *.iobj
 *.pch
-*.pdb
-*.ipdb
 *.pgc
 *.pgd
 *.rsp
@@ -363,5 +361,4 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # Compilation
-*.pdb
 **/obj/
