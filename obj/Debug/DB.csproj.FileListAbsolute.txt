@@ -1,6 +1,0 @@
-C:\Users\cgs-e\source\repos\DB\bin\Debug\MigracionDBController.dll
-C:\Users\cgs-e\source\repos\DB\bin\Debug\MigracionDBController.pdb
-C:\Users\cgs-e\source\repos\DB\obj\Debug\DB.csproj.AssemblyReference.cache
-C:\Users\cgs-e\source\repos\DB\obj\Debug\DB.csproj.CoreCompileInputs.cache
-C:\Users\cgs-e\source\repos\DB\obj\Debug\MigracionDBController.dll
-C:\Users\cgs-e\source\repos\DB\obj\Debug\MigracionDBController.pdb
