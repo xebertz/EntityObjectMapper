@@ -190,4 +190,4 @@ public string MiPropiedad { get; set; }
 
 ## Licencia
 
-Este proyecto no incluye una licencia explícita. Para más información, contacta al autor.
+Este proyecto incluye la licencia "Apache License 2.0". Para más información, consulta la licencia en la raíz del proyecto.
